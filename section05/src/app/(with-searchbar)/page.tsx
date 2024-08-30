@@ -1,6 +1,7 @@
 import BookItem from "@/components/book-item";
 import style from "./page.module.css";
 import { BookData } from "@/types";
+import { notFound } from "next/navigation";
 
 async function AllBooks() {
   const response = await fetch(
@@ -30,6 +31,9 @@ async function RecoBooks() {
     }
   );
   if (!response.ok) {
+    if (response.status === 404) {
+      notFound();
+    }
     return <div>오류가 발생했습니다...</div>;
   }
   const recBooks: BookData[] = await response.json();
