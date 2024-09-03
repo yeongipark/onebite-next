@@ -43,13 +43,16 @@ async function BookDetail({ bookId }: { bookId: string }) {
 
 async function ReviewList({ bookId }: { bookId: string }) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_SERVER_URL}/review/book/${bookId}`
+    `${process.env.NEXT_PUBLIC_API_SERVER_URL}/review/book/${bookId}`,
+    {
+      cache: "force-cache",
+      next: { tags: [`review-${bookId}`] },
+    }
   );
   if (!res.ok) {
     throw new Error("에러가 발생했습니다.");
   }
   const reviewList: reviewData[] = await res.json();
-  console.log(reviewList);
   return (
     <section>
       {reviewList.map((data) => (
