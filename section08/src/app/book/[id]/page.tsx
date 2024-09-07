@@ -4,14 +4,19 @@ import { notFound } from "next/navigation";
 import { createReviewAction } from "@/actions/create-review.action";
 import ReviewItem from "@/components/review-item";
 import ReviewEditor from "@/components/review-editor";
+import { Suspense } from "react";
+import BookItemSkeleton from "@/components/skeleton/book-item-skeleton";
+import { delay } from "@/util/delay";
 
 export function generateStaticParams() {
   return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
 }
 
 async function BookDetail({ bookId }: { bookId: string }) {
+  await delay(1000);
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/${bookId}`
+    `${process.env.NEXT_PUBLIC_API_SERVER_URL}/book/${bookId}`,
+    { cache: "force-cache" }
   );
   if (!response.ok) {
     if (response.status === 404) {
@@ -42,6 +47,7 @@ async function BookDetail({ bookId }: { bookId: string }) {
 }
 
 async function ReviewList({ bookId }: { bookId: string }) {
+  await delay(1500);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_SERVER_URL}/review/book/${bookId}`,
     {
@@ -65,9 +71,13 @@ async function ReviewList({ bookId }: { bookId: string }) {
 export default function Page({ params }: { params: { id: string } }) {
   return (
     <div className={style.container}>
-      <BookDetail bookId={params.id} />
+      <Suspense fallback={<BookItemSkeleton />}>
+        <BookDetail bookId={params.id} />
+      </Suspense>
       <ReviewEditor bookId={params.id} />
-      <ReviewList bookId={params.id} />
+      <Suspense fallback={<div>로딩중...</div>}>
+        <ReviewList bookId={params.id} />
+      </Suspense>
     </div>
   );
 }
